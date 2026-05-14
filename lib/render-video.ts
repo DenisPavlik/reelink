@@ -86,6 +86,7 @@ export async function getRenderStatus(params: {
       progress: status.overallProgress ?? 0,
     };
   } catch (cause) {
+    console.error("[getRenderStatus] cause:", cause);
     throw new FriendlyError("Couldn't check the render status.", cause);
   }
 }
