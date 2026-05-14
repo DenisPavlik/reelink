@@ -40,6 +40,8 @@ export async function startRender(
       imageFormat: "jpeg",
       maxRetries: 1,
       privacy: "public",
+      framesPerLambda: 400,
+      concurrencyPerLambda: 1,
     });
     return { renderId: result.renderId, bucketName: result.bucketName };
   } catch (cause) {
