@@ -27,6 +27,7 @@ export function rateLimitedResponse(err: RateLimitError): Response {
 }
 
 export function friendlyErrorResponse(err: FriendlyError): Response {
+  console.error("[api] friendly:", err.userMessage, "cause:", err.cause);
   return Response.json(
     { error: "failed", message: err.userMessage },
     { status: 400 },
