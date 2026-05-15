@@ -4,14 +4,21 @@ import { ScriptSchema, type Script } from "./schemas";
 import { FriendlyError } from "./errors";
 import type { ExtractedArticle } from "./extract-article";
 
-const SYSTEM_PROMPT = `You write punchy short-form video narration.
+const SYSTEM_PROMPT = `You write punchy short-form video narration AND the visual prompt for each scene.
 
-Rules:
-- Output 3 to 6 scenes. Hook first, payoff last.
-- One spoken sentence per scene, ≤25 words.
+Narration rules:
+- Output 3 to 4 scenes. Hook first, payoff last.
+- One spoken sentence per scene, up to 25 words.
 - No emojis. No markdown. No hashtags.
 - Never say "in this article" or refer to the source — speak directly to the viewer.
-- Plain spoken English a narrator can read out loud.`;
+- Plain spoken English a narrator can read out loud.
+
+Image prompt rules (for each scene's imagePrompt field):
+- One vivid sentence describing a concrete subject + setting + mood that visualizes the scene.
+- 9:16 vertical composition, cinematic depth.
+- No human faces, no on-image text, no logos, no watermarks.
+- Same visual style across all scenes: cinematic, soft volumetric lighting, shallow depth of field, rich color grade, photoreal.
+- Symbolic / atmospheric is fine when the scene is abstract.`;
 
 export async function generateScript(
   article: ExtractedArticle,
