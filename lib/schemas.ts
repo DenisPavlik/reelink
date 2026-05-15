@@ -5,7 +5,7 @@ export const SceneSchema = z.object({
     .string()
     .min(1)
     .max(150)
-    .describe("One spoken sentence, ≤25 words, no emojis, no markdown."),
+    .describe("One spoken sentence, up to 25 words, no emojis, no markdown."),
   imagePrompt: z
     .string()
     .min(1)
