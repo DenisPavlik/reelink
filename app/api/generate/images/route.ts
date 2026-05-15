@@ -1,9 +1,12 @@
-import { synthesizeAudio } from "@/lib/synthesize-audio";
+import { generateImages } from "@/lib/generate-images";
+import { addSpent } from "@/lib/budget";
 import { checkPaused, handleError } from "@/lib/api-helpers";
-import type { ImageScene } from "@/lib/schemas";
+import type { Scene } from "@/lib/schemas";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+const CENTS_PER_IMAGE = 7;
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +14,7 @@ export async function POST(request: Request) {
     if (paused) return paused;
 
     const body = (await request.json()) as {
-      scenes?: ImageScene[];
+      scenes?: Scene[];
       jobId?: string;
     };
     if (!body.scenes || !body.jobId) {
@@ -21,7 +24,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await synthesizeAudio(body.scenes, body.jobId);
+    const result = await generateImages(body.scenes, body.jobId);
+    await addSpent(result.scenes.length * CENTS_PER_IMAGE);
+
     return Response.json(result);
   } catch (err) {
     return handleError(err);

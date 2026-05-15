@@ -1,10 +1,11 @@
 "use client";
 
-import type { Caption, Scene, AudioScene } from "@/lib/schemas";
+import type { Caption, Scene, ImageScene, AudioScene } from "@/lib/schemas";
 
 export type Stage =
   | "idle"
   | "writing-script"
+  | "generating-visuals"
   | "recording-voice"
   | "aligning-captions"
   | "rendering"
@@ -18,6 +19,7 @@ export type StageLabel = {
 
 export const STAGE_LABELS: StageLabel[] = [
   { key: "writing-script", label: "Reading article & writing script" },
+  { key: "generating-visuals", label: "Generating visuals" },
   { key: "recording-voice", label: "Recording voiceover" },
   { key: "aligning-captions", label: "Aligning captions" },
   { key: "rendering", label: "Rendering video" },
@@ -33,6 +35,7 @@ export type OrchestrateResult =
   | { ok: false; kind: "paused" | "rate-limited" | "failed"; message: string };
 
 type StartResponse = { jobId: string; title: string; scenes: Scene[] };
+type ImagesResponse = { scenes: ImageScene[]; jobId: string };
 type AudioResponse = {
   scenes: AudioScene[];
   totalDurationMs: number;
@@ -111,9 +114,15 @@ export async function orchestrate(
     onProgress({ stage: "writing-script" });
     const start = await postJson<StartResponse>("/api/generate/start", { url });
 
+    onProgress({ stage: "generating-visuals" });
+    const images = await postJson<ImagesResponse>("/api/generate/images", {
+      scenes: start.scenes,
+      jobId: start.jobId,
+    });
+
     onProgress({ stage: "recording-voice" });
     const audio = await postJson<AudioResponse>("/api/generate/audio", {
-      scenes: start.scenes,
+      scenes: images.scenes,
       jobId: start.jobId,
     });
 
