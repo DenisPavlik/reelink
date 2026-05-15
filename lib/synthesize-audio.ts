@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { put } from "@vercel/blob";
 import mp3Duration from "mp3-duration";
 import { FriendlyError } from "./errors";
-import type { Scene, AudioScene } from "./schemas";
+import type { ImageScene, AudioScene } from "./schemas";
 
 const SCENE_GAP_MS = 250;
 
@@ -13,12 +13,17 @@ export type SynthesizedAudio = {
 };
 
 export async function synthesizeAudio(
-  scenes: Scene[],
+  scenes: ImageScene[],
   jobId: string = crypto.randomUUID(),
 ): Promise<SynthesizedAudio> {
   const client = new OpenAI();
 
-  let synthesized: { audioUrl: string; durationMs: number; text: string }[];
+  let synthesized: {
+    audioUrl: string;
+    durationMs: number;
+    text: string;
+    imageUrl: string;
+  }[];
   try {
     synthesized = await Promise.all(
       scenes.map(async (scene, idx) => {
@@ -39,6 +44,7 @@ export async function synthesizeAudio(
           audioUrl: url,
           durationMs: Math.round(durationSeconds * 1000),
           text: scene.text,
+          imageUrl: scene.imageUrl,
         };
       }),
     );
@@ -51,6 +57,7 @@ export async function synthesizeAudio(
   for (const item of synthesized) {
     result.push({
       text: item.text,
+      imageUrl: item.imageUrl,
       audioUrl: item.audioUrl,
       durationMs: item.durationMs,
       startMs: cursor,
