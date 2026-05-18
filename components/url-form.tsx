@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +14,42 @@ export type UrlFormProps = {
   paused: boolean;
   pausedMessage?: string;
 };
+
+type UrlCheck =
+  | { ok: true; url: string }
+  | { ok: false; reason: string };
+
+function normalizeAndValidateUrl(input: string): UrlCheck {
+  const trimmed = input.trim();
+  if (!trimmed) return { ok: false, reason: "Paste a URL first." };
+
+  const withScheme = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed}`;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(withScheme);
+  } catch {
+    return { ok: false, reason: "That doesn't look like a valid URL." };
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return { ok: false, reason: "Use an http:// or https:// link." };
+  }
+  if (
+    parsed.hostname === "localhost" ||
+    !parsed.hostname.includes(".") ||
+    parsed.hostname.endsWith(".")
+  ) {
+    return {
+      ok: false,
+      reason: "That hostname isn't a public website.",
+    };
+  }
+
+  return { ok: true, url: parsed.toString() };
+}
 
 export function UrlForm({ paused, pausedMessage }: UrlFormProps) {
   const [url, setUrl] = useState("");
@@ -35,14 +69,21 @@ export function UrlForm({ paused, pausedMessage }: UrlFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (disabled || !url) return;
+    if (disabled) return;
+
+    const check = normalizeAndValidateUrl(url);
+    if (!check.ok) {
+      setError(check.reason);
+      return;
+    }
+
     setError(null);
     setVideoUrl(null);
     setStage("writing-script");
     setStageDetail(undefined);
 
     startTransition(() => {
-      orchestrate(url, onProgress).then((result) => {
+      orchestrate(check.url, onProgress).then((result) => {
         if (result.ok) {
           setVideoUrl(result.videoUrl);
         } else {
@@ -70,44 +111,68 @@ export function UrlForm({ paused, pausedMessage }: UrlFormProps) {
     return <ProgressDisplay stage={stage} detail={stageDetail} />;
   }
 
-  const button = (
-    <Button
+  const submit = (
+    <button
       type="submit"
-      size="lg"
       disabled={disabled}
-      className="h-12 px-8 text-base font-semibold"
+      className="group/btn flex shrink-0 items-center gap-2 bg-ochre/15 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.25em] text-ochre transition-colors disabled:cursor-not-allowed disabled:opacity-30 enabled:hover:bg-ochre enabled:hover:text-ink"
     >
-      Create video
-    </Button>
+      <span>{paused ? "Paused" : "Generate"}</span>
+      <span
+        aria-hidden
+        className="inline-block transition-transform duration-300 group-hover/btn:translate-x-1.5"
+      >
+        →
+      </span>
+    </button>
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-xl">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Input
-          type="url"
-          inputMode="url"
-          placeholder="https://..."
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          disabled={disabled}
-          required
-          className="h-12 text-base bg-white/10 border-white/30 text-white placeholder:text-white/40 backdrop-blur"
-        />
-        {paused ? (
-          <Tooltip>
-            <TooltipTrigger render={<span>{button}</span>} />
-            <TooltipContent side="bottom">
-              {pausedMessage ??
-                "Live demo paused — try the pre-rendered demos below."}
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          button
-        )}
+    <form onSubmit={handleSubmit} className="w-full">
+      {/* Editorial framed input — clearly a paste-here zone */}
+      <div
+        id="url-form-frame"
+        className="group/field relative border border-cream/25 bg-ink-2/40 backdrop-blur transition-colors focus-within:border-ochre/60"
+      >
+        {/* Stamped label that sits in the top border */}
+        <span className="absolute -top-2 left-4 bg-ink px-2 font-mono text-[9px] tracking-[0.3em] text-ochre/85 uppercase">
+          ¶ Paste article URL
+        </span>
+
+        <div className="flex items-stretch gap-3">
+          <input
+            id="article-url"
+            type="text"
+            inputMode="url"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder="https://nyti.ms/some-article"
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              if (error) setError(null);
+            }}
+            disabled={disabled}
+            aria-label="Article URL"
+            aria-invalid={error ? true : undefined}
+            className="w-full min-w-0 flex-1 bg-transparent px-5 py-4 font-mono text-base text-cream placeholder:text-cream/25 focus:outline-none disabled:opacity-50"
+          />
+          {paused ? (
+            <Tooltip>
+              <TooltipTrigger render={<span className="contents">{submit}</span>} />
+              <TooltipContent side="bottom">
+                {pausedMessage ??
+                  "Live demo paused — try the pre-rendered films below."}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            submit
+          )}
+        </div>
       </div>
       {error && (
-        <p className="text-rose-200/90 text-sm bg-rose-900/30 border border-rose-400/30 rounded-md px-3 py-2">
+        <p className="mt-4 border-l-2 border-oxblood/60 bg-oxblood/10 px-4 py-2 font-mono text-xs text-cream/80">
           {error}
         </p>
       )}

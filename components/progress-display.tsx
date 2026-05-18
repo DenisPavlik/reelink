@@ -17,33 +17,33 @@ export type ProgressDisplayProps = {
 export function ProgressDisplay({ stage, detail }: ProgressDisplayProps) {
   const currentIdx = ORDER.indexOf(stage);
   return (
-    <div className="w-full max-w-xl space-y-4">
-      <p className="text-emerald-100/80 text-sm uppercase tracking-widest text-center">
-        Generating your reel
+    <div className="w-full space-y-5 border-t border-cream/15 pt-5">
+      <p className="font-mono text-[10px] tracking-[0.3em] text-ochre/80 uppercase">
+        · Filming your reel
       </p>
       <ul className="space-y-3">
         {STAGE_LABELS.map((s, i) => {
           const state =
             i < currentIdx ? "done" : i === currentIdx ? "current" : "pending";
           return (
-            <li
-              key={s.key}
-              className="flex items-center gap-3 text-base"
-            >
+            <li key={s.key} className="flex items-baseline gap-4">
+              <span className="font-mono text-[10px] tracking-[0.2em] text-cream/35 uppercase">
+                {String(i + 1).padStart(2, "0")}
+              </span>
               <Dot state={state} />
               <span
                 className={
                   state === "done"
-                    ? "text-emerald-200/70 line-through"
+                    ? "font-display text-base text-cream/45 line-through"
                     : state === "current"
-                      ? "text-white font-semibold"
-                      : "text-white/40"
+                      ? "font-display text-base text-cream"
+                      : "font-display text-base text-cream/30"
                 }
               >
                 {s.label}
               </span>
               {state === "current" && detail && (
-                <span className="text-emerald-200/70 text-sm ml-auto">
+                <span className="ml-auto font-mono text-[11px] text-cream/55">
                   {detail}
                 </span>
               )}
@@ -58,20 +58,18 @@ export function ProgressDisplay({ stage, detail }: ProgressDisplayProps) {
 function Dot({ state }: { state: "done" | "current" | "pending" }) {
   if (state === "done") {
     return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400 text-emerald-950">
-        ✓
-      </span>
+      <span className="inline-block size-1.5 translate-y-px rounded-full bg-ochre" />
     );
   }
   if (state === "current") {
     return (
-      <span className="inline-flex h-6 w-6 items-center justify-center">
-        <span className="h-3 w-3 rounded-full bg-emerald-300 animate-ping absolute" />
-        <span className="h-3 w-3 rounded-full bg-emerald-300" />
+      <span className="relative inline-flex size-1.5 translate-y-px items-center justify-center">
+        <span className="absolute inline-flex size-2.5 animate-ping rounded-full bg-ochre/60" />
+        <span className="relative inline-flex size-1.5 rounded-full bg-ochre" />
       </span>
     );
   }
   return (
-    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/30" />
+    <span className="inline-block size-1.5 translate-y-px rounded-full border border-cream/30" />
   );
 }

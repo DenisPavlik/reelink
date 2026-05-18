@@ -20,7 +20,12 @@ const HIDE_DELAY_MS = 2000;
 const SEEK_STEP_S = 5;
 const WHEEL_THROTTLE_MS = 400;
 
-export type ShortsDemo = { src: string; title: string };
+export type ShortsDemo = {
+  src: string;
+  title: string;
+  category: string;
+  description: string;
+};
 
 export type ShortsPlayerProps = {
   open: boolean;
@@ -269,7 +274,7 @@ export function ShortsPlayer({
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-black/85 backdrop-blur-sm" />
         <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none">
           <Dialog.Title className="sr-only">{current.title}</Dialog.Title>
-          <div className="flex items-center gap-4">
+          <div className="relative">
             <div
               ref={stageRef}
               onMouseMove={showControls}
@@ -429,9 +434,26 @@ export function ShortsPlayer({
               </div>
             </div>
 
-            {/* Side navigation arrows — always visible, outside stage */}
+            {/* Editorial caption panel — hangs to LEFT of stage (lg+ only) */}
+            <aside className="pointer-events-none absolute top-1/2 right-[calc(100%+2.5rem)] hidden w-72 -translate-y-1/2 flex-col gap-5 text-cream lg:flex">
+              <span className="font-mono text-[10px] tracking-[0.3em] text-ochre/80 uppercase">
+                N°{String(idx + 1).padStart(2, "0")}
+              </span>
+              <h3 className="font-display text-3xl leading-[1.05] text-cream">
+                <em className="font-medium">{current.title}</em>
+              </h3>
+              <p className="font-sans text-[15px] leading-[1.55] text-cream/70">
+                {current.description}
+              </p>
+              <span className="mt-2 flex items-center gap-3 font-mono text-[10px] tracking-[0.25em] text-cream/45 uppercase">
+                <span className="inline-block h-px w-6 bg-cream/25" />
+                {current.category}
+              </span>
+            </aside>
+
+            {/* Side navigation arrows — hang to RIGHT of stage */}
             {hasMultiple && (
-              <div className="flex flex-col gap-3">
+              <div className="absolute top-1/2 left-[calc(100%+1rem)] hidden -translate-y-1/2 flex-col gap-3 sm:flex">
                 <SideArrowButton
                   onClick={() => navigate(-1)}
                   label="Previous demo"
