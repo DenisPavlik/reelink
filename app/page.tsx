@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { UrlForm } from "@/components/url-form";
@@ -29,9 +30,28 @@ export default async function Home() {
 
   return (
     <main className="reelink-canvas relative h-screen overflow-hidden">
-      {/* ambient layers */}
+      {/* ambient layers — drifting leaks, faded newspaper, halftone print dots, film grain */}
       <div className="reelink-leak reelink-leak-1" aria-hidden />
       <div className="reelink-leak reelink-leak-2" aria-hidden />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.14] mix-blend-luminosity"
+        style={{
+          maskImage:
+            "radial-gradient(ellipse 65% 75% at 32% 48%, #000 0%, #000 22%, transparent 78%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 65% 75% at 32% 48%, #000 0%, #000 22%, transparent 78%)",
+        }}
+      >
+        <Image
+          src="/hero-bg-newspaper.png"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover"
+          priority
+        />
+      </div>
       <div className="reelink-halftone" aria-hidden />
       <div className="reelink-grain" aria-hidden />
 
@@ -67,9 +87,9 @@ export default async function Home() {
           </nav>
         </header>
 
-        {/* Body — 2-column single-viewport */}
+        {/* Body — 2-column single-viewport: hero (with newspaper bg) + film strip */}
         <div className="grid min-h-0 flex-1 grid-cols-12 gap-x-12 pt-10 pb-4 lg:pt-14">
-          {/* Hero column */}
+          {/* Hero text */}
           <section className="col-span-12 flex min-h-0 flex-col lg:col-span-8">
             <p className="font-mono text-[11px] tracking-[0.3em] text-ochre/80 uppercase">
               ¶ N°00 — A film studio in a tab
